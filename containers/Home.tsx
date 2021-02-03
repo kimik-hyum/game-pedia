@@ -1,20 +1,27 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import axios from 'axios';
-import { Platform, Text } from 'react-native';
+import { Platform, Text, Modal } from 'react-native';
 import styled from 'styled-components/native';
 import {isEmpty} from '../helper/util';
 import SearchBar from '../components/SearchBar';
 import {Spinner} from 'native-base';
 import Filter from '../components/Filter';
+import queryString from 'query-string';
 
-const GameListWrap = styled.ScrollView`
+const GameListWrap = styled.View`
+flex:1;
 padding:0px 0;
 `
 const FilterBox = styled.ScrollView`
+  max-height:48px;
   flex-direction:row;
+  border:1px solid #ddd;
+  border-top-width:0;
 `
+
 const List = styled.FlatList`
 width:100%;
+flex:1;
 padding-bottom:50px;
 `
 const ListItem = styled.TouchableOpacity`
@@ -46,7 +53,7 @@ margin-bottom:4px;
 const GamePriceSale = styled.Text`
 text-decoration:line-through;
 `
-const GameTagList = styled.Text`
+const GameTagList = styled.ScrollView`
 margin-top:5px;
 `
 const GameTagBox = styled.View`
@@ -63,34 +70,33 @@ const GameTagText = styled.Text`
 color:#67c1f5;
 `
 
+const Loding = styled(Spinner)`
+  flex:1;
+`
+const ModalBox = styled.View`
+  flex:1;
+  background:rgba(0, 0, 0, 0.7);
+  
+`
+
 const Home = ({navigation}:any) => {
-  const [list, setList] = useState(null);
-  const [searchText, setSearchText] = useState('')
-  const data_url = 'http://192.168.0.103:1337/apps';
-  const filterData = [
-    {title:'출시일', options:[
-      {label:'최신순', value:'recent'},
-      {label:'예전순', value:'old'}
-    ]},
-    {title:'인기도', options:[
-      {label:'인기 많은순', value:'recent'},
-      {label:'인기 없는순', value:'old'}
-    ]},
-    {title:'장르', options:[
-      {label:'액션', value:'recent'},
-      {label:'아케이드', value:'old'}
-    ]},
-    {title:'평점', options:[
-      {label:'액션', value:'recent'},
-      {label:'아케이드', value:'old'}
-    ]},
-
-  ]
+  const [list, setList] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [loading, setLoading] = useState(false);
+  //const [filter, setFilter] = {is_free:false, }
+  const params = {_start:0, _limit:10};
+  const page = useRef(1);
+  const scroll = useRef(true);
+  const data_url = `http://192.168.0.103:1337/apps?`;
   useEffect(() => {
-    getGameData(data_url);
+    getGameData(setUrl());
   }, []);
- 
 
+  const setUrl = (data: object = {}) => {
+    const urlParams = Object.assign({}, params, data);
+    const url = data_url + queryString.stringify(urlParams);
+    return url;
+  }
   const checkPrice = (free: boolean, price:number, sale:number) => {
    const final_price = sale > 0 ? (
       <GameInforText>
@@ -115,28 +121,41 @@ const Home = ({navigation}:any) => {
       id,
     });
   }
-  const getGameData = (url: string) => {
+  const getGameData = (url: string, assign: boolean = false) => {
+    setLoading(true)
     axios.get(url).then((res:any) => {
-      setList(res.data)
+      if(!isEmpty(res.data)){
+        const data = assign ? list.concat(res.data) : res.data;
+        setList(data)
+      } else {
+        scroll.current = false
+      }
+      setLoading(false)
     }).catch((error) => {
       console.log(error)
     })
   }
   const onSubmitSearch = (text: string) => {
-    const url = data_url+`?name_contains=${text}`;
-    setList(null);
+    const url = data_url+`&name_contains=${text}`;
+    setList([]);
     getGameData(url)
+  }
+  const onMore = () => {
+    if(scroll.current) {
+      page.current ++;
+      getGameData(setUrl({_start:page.current * 10}), true);
+    }
   }
   const renderItem = ({item}: any) => {
     return (
       <ListItem
-        key={item.appid}
-        onPress={() => navigationDetailPage(item.appid)}
+        key={item.app_id}
+        onPress={() => navigationDetailPage(item.app_id)}
       >
         <ImageBox>
           <GameImage
             source={{
-              uri: `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.appid}/header.jpg`,
+              uri: `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.app_id}/header.jpg`,
             }}
           />
         </ImageBox>
@@ -144,7 +163,9 @@ const Home = ({navigation}:any) => {
           <GameInforText>{item.name}</GameInforText>
           {checkPrice(item.is_free, item.price, item.sale_price)}
           {!isEmpty(item.date) && <GameInforText>출시일 : {item.date}</GameInforText>}
-          <GameTagList>
+          <GameTagList
+            horizontal
+          >
             {item.genres && setTag(item.genres).map((item, index) => {
               return (
                 <GameTagBox key={index}>
@@ -159,7 +180,6 @@ const Home = ({navigation}:any) => {
       </ListItem>
     )
   }
-  console.log(list)
   return (
     <GameListWrap>
       <SearchBar 
@@ -172,14 +192,27 @@ const Home = ({navigation}:any) => {
       >
         <Filter /> 
       </FilterBox>
-      {list ? (
-        <List 
-          data={list}
-          renderItem={renderItem}
-          keyExtractor={(item:any) => item.appid.toString()}
-        />
+      {!isEmpty(list) ? (
+        <>
+          <List 
+            data={list}
+            renderItem={renderItem}
+            keyExtractor={(item:any) => item.app_id.toString()}
+            onEndReached={onMore}
+            onEndReachedThreshold={0.8}
+          />
+          <Modal
+            visible={loading}
+            transparent
+          >
+            <ModalBox>
+              <Loding color='blue' />
+            </ModalBox>
+            
+          </Modal>
+        </>
       ) : (
-        <Spinner color='blue' />
+        <Loding color='blue' />
       )} 
     </GameListWrap>
   )

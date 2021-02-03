@@ -1,5 +1,4 @@
 import React from 'react';
-import {Platform} from 'react-native';
 import {Button, Text, Icon} from 'native-base';
 import styled from 'styled-components/native';
 
@@ -18,7 +17,7 @@ const FilterIcon = styled(Icon)`
   font-size:14px;
 `
 
-const Filter = (props:any) => {
+const Filter = () => {
   return (
     <FilterItem>
       <FilterButton rounded light>
