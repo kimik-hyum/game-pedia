@@ -27,22 +27,7 @@ padding-bottom:50px;
 const ListItem = styled.TouchableOpacity`
 margin-bottom:10px;
 `
-const ImageBox = styled.View`
-width:100%;
-${Platform.OS === 'web' && `
-  padding-bottom:${(215/460)*100}%
-`}
-`
-const GameImage = styled.Image`
-${Platform.OS === 'web' && `
-  position:absolute;
-  top:0;
-  left:0;
-  height:100%;
-`}
-width:100%;
-aspect-ratio:${460/215};
-`
+
 const GameInfor = styled.View`
 margin:10px 10px 0;
 `
@@ -83,19 +68,43 @@ const Home = ({navigation}:any) => {
   const [list, setList] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [viewType, setViewType] = useState('apps');
   //const [filter, setFilter] = {is_free:false, }
   const params = {_start:0, _limit:10};
   const page = useRef(1);
   const scroll = useRef(true);
-  const data_url = `http://192.168.0.103:1337/apps?`;
+  const data_url = `http://192.168.0.103:1337/`;
   useEffect(() => {
-    getGameData(setUrl());
+    getGameData(setUrl(viewType));
   }, []);
 
-  const setUrl = (data: object = {}) => {
+  const ImageBox = styled.View`
+  width:100%;
+  ${Platform.OS === 'web' && `
+    padding-bottom:${viewType === 'apps' ? (215/460)*100 : (275/447)*100}%
+  `}
+  `
+  const GameImage = styled.Image`
+  ${Platform.OS === 'web' && `
+    position:absolute;
+    top:0;
+    left:0;
+    height:100%;
+  `}
+  width:100%;
+  aspect-ratio:${viewType === 'apps' ? 460/215 : 447/275};
+  `
+
+  const setUrl = (type: string = 'apps', data: object = {}) => {
     const urlParams = Object.assign({}, params, data);
-    const url = data_url + queryString.stringify(urlParams);
+    const youtubeParams = type === "youtubes" ? '?korean=true&' : '?'
+    const url = data_url + type + youtubeParams + queryString.stringify(urlParams);
     return url;
+  }
+
+  const onViewType = (type: string) => {
+    setViewType(type);
+    getGameData(setUrl(type));
   }
   const checkPrice = (free: boolean, price:number, sale:number) => {
    const final_price = sale > 0 ? (
@@ -116,7 +125,7 @@ const Home = ({navigation}:any) => {
     const arr = str.split(",");
     return arr;
   }
-  const navigationDetailPage = (id:number) => {
+  const navigationDetailPage = (id:number = 0) => {
     navigation.navigate('Detail', {
       id,
     });
@@ -143,42 +152,78 @@ const Home = ({navigation}:any) => {
   const onMore = () => {
     if(scroll.current) {
       page.current ++;
-      getGameData(setUrl({_start:page.current * 10}), true);
+      getGameData(setUrl(viewType, {_start:page.current * 10}), true);
     }
   }
   const renderItem = ({item}: any) => {
-    return (
-      <ListItem
-        key={item.app_id}
-        onPress={() => navigationDetailPage(item.app_id)}
-      >
-        <ImageBox>
-          <GameImage
-            source={{
-              uri: `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.app_id}/header.jpg`,
-            }}
-          />
-        </ImageBox>
-        <GameInfor>
-          <GameInforText>{item.name}</GameInforText>
-          {checkPrice(item.is_free, item.price, item.sale_price)}
-          {!isEmpty(item.date) && <GameInforText>출시일 : {item.date}</GameInforText>}
-          <GameTagList
-            horizontal
-          >
-            {item.genres && setTag(item.genres).map((item, index) => {
-              return (
-                <GameTagBox key={index}>
-                  <GameTag>
-                    <GameTagText>{item}</GameTagText>
-                  </GameTag>
-                </GameTagBox>
-              )
-            })}
-          </GameTagList>
-        </GameInfor>
-      </ListItem>
-    )
+    console.log(item)
+    if(viewType === 'apps') {
+      return (
+        <ListItem
+          key={item._id}
+          onPress={() => navigationDetailPage(item.app_id)}
+        >
+          <ImageBox>
+            <GameImage
+              source={{
+                uri: `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.app_id}/header.jpg`,
+              }}
+            />
+          </ImageBox>
+          <GameInfor>
+            <GameInforText>{item.name}</GameInforText>
+            {checkPrice(item.is_free, item.price, item.sale_price)}
+            {!isEmpty(item.date) && <GameInforText>출시일 : {item.date}</GameInforText>}
+            <GameTagList
+              horizontal
+            >
+              {item.genres && setTag(item.genres).map((item, index) => {
+                return (
+                  <GameTagBox key={index}>
+                    <GameTag>
+                      <GameTagText>{item}</GameTagText>
+                    </GameTag>
+                  </GameTagBox>
+                )
+              })}
+            </GameTagList>
+          </GameInfor>
+        </ListItem>
+      )
+    } else {
+      return (
+        <ListItem
+          key={item._id}
+          onPress={() => navigationDetailPage()}
+        >
+          <ImageBox>
+            <GameImage
+              source={{
+                uri: item.thumbnail,
+              }}
+            />
+          </ImageBox>
+          <GameInfor>
+            <GameInforText>{item.title}</GameInforText>
+            {!isEmpty(item.upload_date) && <GameInforText>{item.upload_date}</GameInforText>}
+            <GameTagList
+              horizontal
+            >
+              {item.tag && setTag(item.tag).map((item, index) => {
+                return (
+                  <GameTagBox key={index}>
+                    <GameTag>
+                      <GameTagText>{item}</GameTagText>
+                    </GameTag>
+                  </GameTagBox>
+                )
+              })}
+            </GameTagList>
+          </GameInfor>
+        </ListItem>
+      )
+    }
+    
   }
   return (
     <GameListWrap>
@@ -190,14 +235,16 @@ const Home = ({navigation}:any) => {
       <FilterBox
         horizontal
       >
-        <Filter /> 
+        <Filter 
+          onViewType={onViewType}
+        /> 
       </FilterBox>
       {!isEmpty(list) ? (
         <>
           <List 
             data={list}
             renderItem={renderItem}
-            keyExtractor={(item:any) => item.app_id.toString()}
+            keyExtractor={(item:any) => item._id}
             onEndReached={onMore}
             onEndReachedThreshold={0.8}
           />

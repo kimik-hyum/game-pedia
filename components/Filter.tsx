@@ -17,9 +17,13 @@ const FilterIcon = styled(Icon)`
   font-size:14px;
 `
 
-const Filter = () => {
+const Filter = (props: any) => {
+  const { onViewType } = props;
   return (
     <FilterItem>
+      <FilterButton rounded light onPress={() => onViewType('youtubes')}>
+        <Text>리스트 타입 변경</Text>
+      </FilterButton>
       <FilterButton rounded light>
         <Text>무료</Text>
       </FilterButton>
