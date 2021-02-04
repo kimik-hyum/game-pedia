@@ -123,10 +123,10 @@ const Home = ({navigation}:any) => {
   }
   const setTag = (str: string) => {
     const arr = str.split(",");
-    return arr;
+    return arr.filter((item) => !isEmpty(item));
   }
-  const navigationDetailPage = (id:number = 0) => {
-    navigation.navigate('Detail', {
+  const navigationDetailPage = (id:number = 0, name = 'AppDetail') => {
+    navigation.navigate(name, {
       id,
     });
   }
@@ -161,7 +161,7 @@ const Home = ({navigation}:any) => {
       return (
         <ListItem
           key={item._id}
-          onPress={() => navigationDetailPage(item.app_id)}
+          onPress={() => navigationDetailPage(item.app_id, 'AppDetail')}
         >
           <ImageBox>
             <GameImage
@@ -177,11 +177,11 @@ const Home = ({navigation}:any) => {
             <GameTagList
               horizontal
             >
-              {item.genres && setTag(item.genres).map((item, index) => {
+              {!isEmpty(item.genres) && setTag(item.genres).map((el, index) => {
                 return (
                   <GameTagBox key={index}>
                     <GameTag>
-                      <GameTagText>{item}</GameTagText>
+                      <GameTagText>{el}</GameTagText>
                     </GameTag>
                   </GameTagBox>
                 )
@@ -194,7 +194,7 @@ const Home = ({navigation}:any) => {
       return (
         <ListItem
           key={item._id}
-          onPress={() => navigationDetailPage()}
+          onPress={() => navigationDetailPage(item.youtube_ids, 'YoutubeDetail')}
         >
           <ImageBox>
             <GameImage

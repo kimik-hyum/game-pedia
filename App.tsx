@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import styled from 'styled-components/native';
 import Home from './containers/Home';
 import Detail from './containers/Detail';
+import YoutubeDetail from './containers/YoutubeDetail';
 
 const Stack = createStackNavigator();
 const MentoTheme = {
@@ -19,7 +20,8 @@ const linking = {
   config: {
     screens: {
       Home: '',
-      Detail: '/detail/:id'
+      AppDetail: '/app_detail/:id',
+      YoutubeDetail:'/youtube_detail/:id'
     },
   },
 }
@@ -45,8 +47,12 @@ const App = () => {
             component={Home} 
           />
           <Stack.Screen 
-            name="Detail" 
+            name="AppDetail" 
             component={Detail} 
+          />
+          <Stack.Screen 
+            name="YoutubeDetail" 
+            component={YoutubeDetail} 
           />
         </Stack.Navigator>
       </NavigationContainer>
