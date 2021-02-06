@@ -1,79 +1,25 @@
 import React, {useEffect, useState, useRef} from 'react';
 import axios from 'axios';
-import { Platform, Text, Modal } from 'react-native';
+import { Platform, Text, Modal, Switch } from 'react-native';
 import styled from 'styled-components/native';
 import {isEmpty} from '../helper/util';
 import SearchBar from '../components/SearchBar';
-import {Spinner} from 'native-base';
 import Filter from '../components/Filter';
+import FilterModal from '../components/FilterModal';
 import queryString from 'query-string';
-
-const GameListWrap = styled.View`
-flex:1;
-padding:0px 0;
-`
-const FilterBox = styled.ScrollView`
-  max-height:48px;
-  flex-direction:row;
-  border:1px solid #ddd;
-  border-top-width:0;
-`
-
-const List = styled.FlatList`
-width:100%;
-flex:1;
-padding-bottom:50px;
-`
-const ListItem = styled.TouchableOpacity`
-margin-bottom:10px;
-`
-
-const GameInfor = styled.View`
-margin:10px 10px 0;
-`
-
-const GameInforText = styled.Text`
-margin-bottom:4px;
-`
-const GamePriceSale = styled.Text`
-text-decoration:line-through;
-`
-const GameTagList = styled.ScrollView`
-margin-top:5px;
-`
-const GameTagBox = styled.View`
-padding-right:10px;
-`
-const GameTag = styled.View`
-color:#67c1f5;
-padding:3px 5px;
-font-size:12px;
-border-radius:3px;
-background:rgba( 103, 193, 245, 0.2 );
-`
-const GameTagText = styled.Text`
-color:#67c1f5;
-`
-
-const Loding = styled(Spinner)`
-  flex:1;
-`
-const ModalBox = styled.View`
-  flex:1;
-  background:rgba(0, 0, 0, 0.7);
-  
-`
+import HomeStyle from '../styled/HomeStyle';
 
 const Home = ({navigation}:any) => {
   const [list, setList] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
   const [viewType, setViewType] = useState('apps');
+  const [filter, setFilter] = useState(false);
   //const [filter, setFilter] = {is_free:false, }
   const params = {_start:0, _limit:10};
   const page = useRef(1);
   const scroll = useRef(true);
-  const data_url = `http://192.168.0.103:1337/`;
+  const data_url = `http://192.168.219.130:1337/`;
   useEffect(() => {
     getGameData(setUrl(viewType));
   }, []);
@@ -97,7 +43,7 @@ const Home = ({navigation}:any) => {
 
   const setUrl = (type: string = 'apps', data: object = {}) => {
     const urlParams = Object.assign({}, params, data);
-    const youtubeParams = type === "youtubes" ? '?korean=true&' : '?'
+    const youtubeParams = type === "youtubes" ? '?korean=true&_sort=upload_date:DESC&' : '?'
     const url = data_url + type + youtubeParams + queryString.stringify(urlParams);
     return url;
   }
@@ -106,17 +52,20 @@ const Home = ({navigation}:any) => {
     setViewType(type);
     getGameData(setUrl(type));
   }
+  const onFilter = (plag:boolean = true) => {
+    setFilter(plag)
+  }
   const checkPrice = (free: boolean, price:number, sale:number) => {
    const final_price = sale > 0 ? (
-      <GameInforText>
-        <GamePriceSale>{price*(100/(100-sale))}</GamePriceSale>,
+      <HomeStyle.GameInforText>
+        <HomeStyle.GamePriceSale>{price*(100/(100-sale))}</HomeStyle.GamePriceSale>,
         <Text>₩ {price}</Text>
-      </GameInforText>
+      </HomeStyle.GameInforText>
     ) : (
-      <GameInforText>₩ {price}</GameInforText>
+      <HomeStyle.GameInforText>₩ {price}</HomeStyle.GameInforText>
     );
     return free ? (
-      <GameInforText>무료</GameInforText>
+      <HomeStyle.GameInforText>무료</HomeStyle.GameInforText>
     ) : (
       final_price
     );
@@ -155,11 +104,13 @@ const Home = ({navigation}:any) => {
       getGameData(setUrl(viewType, {_start:page.current * 10}), true);
     }
   }
+  const toggleSwitch = () => {
+    onViewType(viewType === 'apps' ? 'youtubes' : 'apps');
+  }
   const renderItem = ({item}: any) => {
-    console.log(item)
     if(viewType === 'apps') {
       return (
-        <ListItem
+        <HomeStyle.ListItem
           key={item._id}
           onPress={() => navigationDetailPage(item.app_id, 'AppDetail')}
         >
@@ -170,29 +121,31 @@ const Home = ({navigation}:any) => {
               }}
             />
           </ImageBox>
-          <GameInfor>
-            <GameInforText>{item.name}</GameInforText>
+          <HomeStyle.GameInfor>
+            <HomeStyle.GameInforText>{item.name}</HomeStyle.GameInforText>
             {checkPrice(item.is_free, item.price, item.sale_price)}
-            {!isEmpty(item.date) && <GameInforText>출시일 : {item.date}</GameInforText>}
-            <GameTagList
+            {!isEmpty(item.date) && (
+              <HomeStyle.GameInforText>출시일 : {item.date}</HomeStyle.GameInforText>
+            )}
+            <HomeStyle.GameTagList
               horizontal
             >
               {!isEmpty(item.genres) && setTag(item.genres).map((el, index) => {
                 return (
-                  <GameTagBox key={index}>
-                    <GameTag>
-                      <GameTagText>{el}</GameTagText>
-                    </GameTag>
-                  </GameTagBox>
+                  <HomeStyle.GameTagBox key={index}>
+                    <HomeStyle.GameTag>
+                      <HomeStyle.GameTagText>{el}</HomeStyle.GameTagText>
+                    </HomeStyle.GameTag>
+                  </HomeStyle.GameTagBox>
                 )
               })}
-            </GameTagList>
-          </GameInfor>
-        </ListItem>
+            </HomeStyle.GameTagList>
+          </HomeStyle.GameInfor>
+        </HomeStyle.ListItem>
       )
     } else {
       return (
-        <ListItem
+        <HomeStyle.ListItem
           key={item._id}
           onPress={() => navigationDetailPage(item.youtube_ids, 'YoutubeDetail')}
         >
@@ -203,45 +156,53 @@ const Home = ({navigation}:any) => {
               }}
             />
           </ImageBox>
-          <GameInfor>
-            <GameInforText>{item.title}</GameInforText>
-            {!isEmpty(item.upload_date) && <GameInforText>{item.upload_date}</GameInforText>}
-            <GameTagList
+          <HomeStyle.GameInfor>
+            <HomeStyle.GameInforText>{item.title}</HomeStyle.GameInforText>
+            {!isEmpty(item.upload_date) && <HomeStyle.GameInforText>{item.upload_date}</HomeStyle.GameInforText>}
+            <HomeStyle.GameTagList
               horizontal
             >
               {item.tag && setTag(item.tag).map((item, index) => {
                 return (
-                  <GameTagBox key={index}>
-                    <GameTag>
-                      <GameTagText>{item}</GameTagText>
-                    </GameTag>
-                  </GameTagBox>
+                  <HomeStyle.GameTagBox key={index}>
+                    <HomeStyle.GameTag>
+                      <HomeStyle.GameTagText>{item}</HomeStyle.GameTagText>
+                    </HomeStyle.GameTag>
+                  </HomeStyle.GameTagBox>
                 )
               })}
-            </GameTagList>
-          </GameInfor>
-        </ListItem>
+            </HomeStyle.GameTagList>
+          </HomeStyle.GameInfor>
+        </HomeStyle.ListItem>
       )
     }
     
   }
   return (
-    <GameListWrap>
+    <HomeStyle.GameListWrap>
       <SearchBar 
         onSubmitSearch={onSubmitSearch}
         setSearchText={setSearchText}
         text={searchText}
+        onFilter={onFilter}
       />
-      <FilterBox
-        horizontal
-      >
+      <HomeStyle.FilterBox>
         <Filter 
           onViewType={onViewType}
         /> 
-      </FilterBox>
+        <HomeStyle.TogglBox>
+          <Switch
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={viewType === 'apps' ? "#3f51b5" : "#f4f3f4"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitch}
+            value={viewType === 'apps'}
+          />
+        </HomeStyle.TogglBox>
+      </HomeStyle.FilterBox>
       {!isEmpty(list) ? (
         <>
-          <List 
+          <HomeStyle.List 
             data={list}
             renderItem={renderItem}
             keyExtractor={(item:any) => item._id}
@@ -252,16 +213,20 @@ const Home = ({navigation}:any) => {
             visible={loading}
             transparent
           >
-            <ModalBox>
-              <Loding color='blue' />
-            </ModalBox>
+            <HomeStyle.ModalBox>
+              <HomeStyle.Loding color='blue' />
+            </HomeStyle.ModalBox>
             
           </Modal>
         </>
       ) : (
-        <Loding color='blue' />
+        <HomeStyle.Loding color='blue' />
       )} 
-    </GameListWrap>
+      <FilterModal 
+        filter={filter}
+        onFilter={onFilter}
+      />
+    </HomeStyle.GameListWrap>
   )
 }
 

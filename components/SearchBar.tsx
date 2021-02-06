@@ -1,16 +1,28 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Header, Item, Input, Icon, Button } from 'native-base';
+import { Header, Item, Input, Icon } from 'native-base';
 
-const SearchBtnText = styled.Text`
- opacity:0;
+const FilterBox = styled.View`
+  flex:1;
+  justify-content:center;
+  min-width:47px;
+  padding:0 10px;
+`
+const SerachBox = styled(Item)`
+  flex:90;
+`
+const FilterButton = styled.TouchableOpacity`
+`
+const Searchheader = styled(Header)`
+  padding-left:10px;
+  padding-right:0;
 `
 
 const SearchBar = (props: any) => {
-  const { text, onSubmitSearch, setSearchText, visibleButton } = props;
+  const { text, onSubmitSearch, setSearchText, onFilter } = props;
   return (
-    <Header searchBar rounded>
-      <Item>
+    <Searchheader searchBar rounded>
+      <SerachBox>
         <Icon name="ios-search" />
         <Input 
           placeholder="Search" 
@@ -18,14 +30,13 @@ const SearchBar = (props: any) => {
           onChangeText={setSearchText}
           onSubmitEditing={() => onSubmitSearch(text)}
         />
-        <Icon name="ios-checkmark" />
-      </Item>
-      {visibleButton && <Button transparent
-        onPress={() => onSubmitSearch(text)}
-      >
-        <SearchBtnText>Search</SearchBtnText>
-      </Button>}
-    </Header>
+      </SerachBox>
+      <FilterBox>
+        <FilterButton onPress={() => onFilter(true)}>
+          <Icon name="ios-filter" />
+        </FilterButton>
+      </FilterBox>
+    </Searchheader>
   )
 }
 
