@@ -1,11 +1,13 @@
-import React  from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native'; 
+import React, {useState} from 'react';
+import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {Platform} from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import styled from 'styled-components/native';
 import Home from './containers/Home';
 import Detail from './containers/Detail';
 import YoutubeDetail from './containers/YoutubeDetail';
+import {Provider} from 'react-redux';
+import store from './store';
 
 const Stack = createStackNavigator();
 const MentoTheme = {
@@ -20,45 +22,45 @@ const linking = {
   config: {
     screens: {
       Home: '',
-      AppDetail: '/app_detail/:id',
-      YoutubeDetail:'/youtube_detail/:id'
+      AppDetail: {
+        path: '/app_detail/:id',
+      },
+      YoutubeDetail: '/youtube_detail/:id',
     },
   },
-}
+};
 
 const App = () => {
+  const [gameList, setGameList] = useState<any>([]);
   const isWeb = Platform.OS === 'web';
   const AppWrap = styled.View`
     ${isWeb ? 'height:100vh;' : 'flex:1;'}
-  `
+  `;
   return (
-    <AppWrap>
-      <NavigationContainer 
-        theme={MentoTheme}
-        linking={linking}
-      >
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: isWeb ? false : true
-          }}
-        >
-          <Stack.Screen 
-            name="Home" 
-            component={Home} 
-          />
-          <Stack.Screen 
-            name="AppDetail" 
-            component={Detail} 
-          />
-          <Stack.Screen 
-            name="YoutubeDetail" 
-            component={YoutubeDetail} 
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </AppWrap>
+    <Provider store={store}>
+      <AppWrap>
+        <NavigationContainer theme={MentoTheme} linking={linking}>
+          <Stack.Navigator>
+            <Stack.Screen
+              name="Home"
+              component={Home}
+              initialParams={{data: gameList, setData: setGameList}}
+            />
+            <Stack.Screen
+              name="AppDetail"
+              component={Detail}
+              initialParams={{data: gameList, setData: setGameList}}
+            />
+            <Stack.Screen
+              name="YoutubeDetail"
+              component={YoutubeDetail}
+              initialParams={{data: gameList}}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </AppWrap>
+    </Provider>
   );
 };
-
 
 export default App;
