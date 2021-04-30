@@ -7,12 +7,11 @@ import SearchBar from '../components/SearchBar';
 import FilterModal from '../components/FilterModal';
 import queryString from 'query-string';
 import HomeStyle from '../styled/HomeStyle';
-import {useSelector} from 'react-redux';
-import {selectMobile} from '../store/ui/uiSelector';
+import {useDispatch} from 'react-redux';
+import { uiSlice } from '../store/ui/uiSlice'
 
 const Home = ({navigation}: any) => {
-  const isMobile = useSelector(selectMobile);
-  console.log('isMobile', isMobile);
+  const dispatch = useDispatch()
   const [list, setList] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -88,9 +87,9 @@ const Home = ({navigation}: any) => {
     return arr.filter((item) => !isEmpty(item));
   };
   const navigationDetailPage = (item: any) => {
+    dispatch(uiSlice.actions.setYoutubeList(item.youtubes))
     navigation.navigate('AppDetail', {
-      id: item.app_id,
-      youtubes: item.youtubes.map((item: any) => item.youtube_ids).toString(),
+      id: item.app_id
     });
   };
 

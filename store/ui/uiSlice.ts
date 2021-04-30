@@ -1,17 +1,38 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
+
+export type initState = {
+  youtubeList: API[] | [];
+};
+
+interface API {
+  app: string
+  author: string
+  author_image: string
+  createdAt: string
+  id: string
+  korean: boolean
+  published_at: string
+  tag: string
+  thumbnail: string
+  title: string
+  updatedAt: string
+  upload_date: string
+  view_count: number
+  youtube_ids: string
+  __v: number
+  _id: string
+}
+
+const initialState:initState  = {
+  youtubeList: [],
+}
 export const uiSlice = createSlice({
   name: 'UI',
-  initialState: {
-    isMobile: window.innerWidth < 800,
-    activateLnb: false,
-  },
+  initialState,
   reducers: {
-    setMobile: (state, action: PayloadAction<boolean>) => {
-      state.isMobile = action.payload;
-    },
-    setActivateLnb: (state, action: PayloadAction<boolean>) => {
-      state.activateLnb = action.payload;
+    setYoutubeList: (state, action: PayloadAction<API[]>) => {
+      state.youtubeList = action.payload;
     },
   },
 });

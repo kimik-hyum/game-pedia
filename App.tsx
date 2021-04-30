@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {Platform} from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -31,7 +31,6 @@ const linking = {
 };
 
 const App = () => {
-  const [gameList, setGameList] = useState<any>([]);
   const isWeb = Platform.OS === 'web';
   const AppWrap = styled.View`
     ${isWeb ? 'height:100vh;' : 'flex:1;'}
@@ -44,17 +43,14 @@ const App = () => {
             <Stack.Screen
               name="Home"
               component={Home}
-              initialParams={{data: gameList, setData: setGameList}}
             />
             <Stack.Screen
               name="AppDetail"
               component={Detail}
-              initialParams={{data: gameList, setData: setGameList}}
             />
             <Stack.Screen
               name="YoutubeDetail"
               component={YoutubeDetail}
-              initialParams={{data: gameList}}
             />
           </Stack.Navigator>
         </NavigationContainer>

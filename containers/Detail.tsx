@@ -1,8 +1,11 @@
 import React from 'react';
 import {ScrollView, Text} from 'react-native';
+import {useSelector} from 'react-redux';
+import {youtubeList} from '../store/ui/uiSelector';
 
 const Detail = ({route, navigation}: any) => {
-  const {id, youtubes} = route.params;
+  const youtube = useSelector(youtubeList)
+  const {id} = route.params;
   const navigationYoutubePage = (id: string) => {
     navigation.navigate('YoutubeDetail', {
       id: id,
@@ -11,11 +14,14 @@ const Detail = ({route, navigation}: any) => {
   return (
     <ScrollView>
       <Text>{id}</Text>
-      {youtubes.split(',').map((ids: string, i: number) => (
-        <Text onPress={() => navigationYoutubePage(ids)} key={i}>
-          {ids}
-        </Text>
-      ))}
+      {youtube.map((item: any, i:number) => {
+        console.log('youtube', item)
+        return (
+          <Text onPress={() => navigationYoutubePage(item.youtube_ids)} key={i}>
+            {item.title}
+          </Text>
+        )
+      })}
     </ScrollView>
   );
 };

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios": "react-native run-ios --simulator='iPhone 11'",
+    "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
@@ -25,6 +25,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.0.0-alpha.3",
     "http-proxy-middleware": "^1.0.6",
+    "jetifier": "^1.6.6",
     "livereload": "^0.9.1",
     "native-base": "^2.15.2",
     "query-string": "^6.13.8",

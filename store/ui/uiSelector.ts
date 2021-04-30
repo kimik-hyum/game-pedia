@@ -3,8 +3,7 @@ import {RootState} from '../../store';
 
 const selectUi = (state: RootState) => state.ui;
 
-export const selectMobile = createSelector(selectUi, (ui) => ui.isMobile);
-export const selectActivateLnb = createSelector(
+export const youtubeList = createSelector(
   selectUi,
-  (ui) => ui.activateLnb,
+  (ui) => ui.youtubeList,
 );
