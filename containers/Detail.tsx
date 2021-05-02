@@ -14,8 +14,7 @@ const Detail = ({route, navigation}: any) => {
   return (
     <ScrollView>
       <Text>{id}</Text>
-      {youtube.map((item: any, i:number) => {
-        console.log('youtube', item)
+      {(youtube as []).map((item: any, i:number) => {
         return (
           <Text onPress={() => navigationYoutubePage(item.youtube_ids)} key={i}>
             {item.title}
