@@ -16,12 +16,12 @@ const Home = ({navigation}: any) => {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
   const [appType, setAppType] = useState<boolean>(true);
-  const [filter, setFilter] = useState(false);
-  //const [filter, setFilter] = {is_free:false, }
+  const [filterModal, setFilterModal] = useState(false);
+  const [filter, setFilter] = useState({tag: [], sort:''});
   const params = {_start: 0, _limit: 10};
   const page = useRef(1);
   const scroll = useRef(true);
-  const data_url = 'http://0.0.0.0:1337/';
+  const data_url = 'http://192.168.219.101:1337/';
   useEffect(() => {
     getGameData(setUrl(appType));
   }, []);
@@ -45,7 +45,7 @@ const Home = ({navigation}: any) => {
   };
   
   const onFilter = (plag: boolean = true) => {
-    setFilter(plag);
+    setFilterModal(plag);
   };
 
   const navigationPage = (item: any) => {
@@ -119,7 +119,7 @@ const Home = ({navigation}: any) => {
         onSubmitSearch={onSubmitSearch}
         setSearchText={setSearchText}
         text={searchText}
-        onFilter={onFilter}
+        onFilter={setFilterModal}
       />
       <HomeStyle.FilterBox>
         <HomeStyle.TogglBox>
@@ -150,7 +150,7 @@ const Home = ({navigation}: any) => {
       ) : (
         <HomeStyle.Loding color="blue" />
       )}
-      <FilterModal filter={filter} onFilter={onFilter} />
+      <FilterModal filterModal={filterModal} onFilter={onFilter} setFilter={setFilter}/>
     </HomeStyle.GameListWrap>
   );
 };

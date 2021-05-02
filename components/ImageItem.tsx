@@ -6,7 +6,6 @@ import styled from 'styled-components/native';
 
 
 export default function ImageItem({item, appType, navigationPage, children}: any) {
-  console.log(item)
   const ImageBox = styled.View`
     width: 100%;
     ${Platform.OS === 'web' &&
@@ -57,7 +56,7 @@ export default function ImageItem({item, appType, navigationPage, children}: any
   }
   
   const renderTag = (tag: string) => {
-    if(tag.length === 0) return null;
+    if(isEmpty(tag)) return null;
     return setTag(tag).map((el, index) => {
       return (
         <HomeStyle.GameTagBox key={index}>

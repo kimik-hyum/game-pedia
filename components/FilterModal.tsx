@@ -6,9 +6,91 @@ import styled from 'styled-components/native';
 interface FilterModalProps {
   ModalFilterType?: string;
   ModalTextType?: string;
-  filter?: boolean;
+  filterModal?: boolean;
   onFilter?: Function;
+  setFilter?: Function;
 }
+
+const FilterModal: React.FC<FilterModalProps> = (props: any) => {
+  const filterArray = ['무료', '멀티 플레이', '싱글 플레이', '액션', '인디', '시뮬레이션', 'VR', '캐주얼'];
+  const [tag, setTag] = useState<string[]>([]);
+  const {filterModal, onFilter} = props;
+  const [selected, setSelected] = useState('key1');
+  const onValueChange = (value: string) => {
+    setSelected(value);
+  };
+  const removeTag = (text: string) => {
+    const cloneTag = tag.slice();
+    const index = tag.findIndex(item => item === text)
+    cloneTag.splice(index, 1);
+    setTag(cloneTag)
+  }
+  const addTag = (text: string) => {
+    tag.indexOf(text) > -1 ? removeTag(text) : setTag(tag.concat(text))
+  }
+  console.log(tag)
+
+  return (
+    <Modal
+      visible={filterModal}
+      transparent
+      onRequestClose={() => {
+        onFilter(false);
+      }}>
+      <FilterModalBox onPress={() => onFilter(false)}>
+        <FilterWrap onPress={(event) => event.stopPropagation()}>
+          <ModalTitle>검색 필터</ModalTitle>
+          <ModalFilterItem>
+            <ModalFilterItemText>정렬 기준</ModalFilterItemText>
+            <ModalFilterItemSelect
+              note
+              mode="dropdown"
+              selectedValue={selected}
+              iosIcon={<Icon name="chevron-down" />}
+              onValueChange={(v) => onValueChange(v)}>
+              <Picker.Item label="인기순" value="key0" />
+              <Picker.Item label="출시일 순" value="key1" />
+              <Picker.Item label="평점 순" value="key2" />
+            </ModalFilterItemSelect>
+          </ModalFilterItem>
+          <ModalFilterItem>
+            <ModalFilterItemText>출시 날짜</ModalFilterItemText>
+            <ModalFilterItemSelect
+              note
+              mode="dropdown"
+              selectedValue={selected}
+              iosIcon={<Icon name="chevron-down" />}
+              onValueChange={(v) => onValueChange(v)}>
+              <Picker.Item label="이번 주" value="key0" />
+              <Picker.Item label="이번 달" value="key1" />
+              <Picker.Item label="올해" value="key2" />
+            </ModalFilterItemSelect>
+          </ModalFilterItem>
+          <ModalFilterItem ModalFilterType={'column'}>
+            <ModalFilterItemText ModalTextType={'column'}>
+              태그
+            </ModalFilterItemText>
+            <ModalFilterTagList>
+              {filterArray.map((item: string, i:number) => (
+                <ModalFilterTag onPress={() => addTag(item)} key={i} bordered rounded light primary small>
+                  <ModalFilterTagText>{item}</ModalFilterTagText>
+                </ModalFilterTag>
+              ))}
+            </ModalFilterTagList>
+          </ModalFilterItem>
+          <FilterBottom>
+            <ModalNormalBtn active small>
+             <Text>적용</Text>
+            </ModalNormalBtn>
+            <ModalNormalBtn active small onPress={() => onFilter(false)}>
+             <Text>취소</Text>
+            </ModalNormalBtn>
+          </FilterBottom>
+        </FilterWrap>
+      </FilterModalBox>
+    </Modal>
+  );
+};
 
 const FilterModalBox = styled(Pressable)`
   flex: 1;
@@ -56,84 +138,18 @@ const ModalFilterTag = styled(Button)`
   margin-top: 8px;
   margin-right: 8px;
 `;
+
+const FilterBottom = styled(View)`
+  margin-top: 25px;
+  flex-direction: row;
+  justify-content: flex-end;
+`
+
+const ModalNormalBtn = styled(Button)`
+  margin-left: 8px;
+`
+
 const ModalFilterTagText = styled(Text)``;
 
-const FilterModal: React.FC<FilterModalProps> = (props: any) => {
-  const {filter, onFilter} = props;
-  const [selected, setSelected] = useState('key1');
-  const onValueChange = (value: string) => {
-    setSelected(value);
-  };
-  return (
-    <Modal
-      visible={filter}
-      transparent
-      onRequestClose={() => {
-        onFilter(false);
-      }}>
-      <FilterModalBox onPress={() => onFilter(false)}>
-        <FilterWrap onPress={(event) => event.stopPropagation()}>
-          <ModalTitle>검색 필터</ModalTitle>
-          <ModalFilterItem>
-            <ModalFilterItemText>정렬기준</ModalFilterItemText>
-            <ModalFilterItemSelect
-              note
-              mode="dropdown"
-              selectedValue={selected}
-              iosIcon={<Icon name="chevron-down" />}
-              onValueChange={(v) => onValueChange(v)}>
-              <Picker.Item label="인기순" value="key0" />
-              <Picker.Item label="출시일 순" value="key1" />
-              <Picker.Item label="평점 순" value="key2" />
-            </ModalFilterItemSelect>
-          </ModalFilterItem>
-          <ModalFilterItem>
-            <ModalFilterItemText>출시 날짜</ModalFilterItemText>
-            <ModalFilterItemSelect
-              note
-              mode="dropdown"
-              selectedValue={selected}
-              iosIcon={<Icon name="chevron-down" />}
-              onValueChange={(v) => onValueChange(v)}>
-              <Picker.Item label="이번 주" value="key0" />
-              <Picker.Item label="이번 달" value="key1" />
-              <Picker.Item label="올해" value="key2" />
-            </ModalFilterItemSelect>
-          </ModalFilterItem>
-          <ModalFilterItem ModalFilterType={'column'}>
-            <ModalFilterItemText ModalTextType={'column'}>
-              태그
-            </ModalFilterItemText>
-            <ModalFilterTagList>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>무료</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>멀티 플레이</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>싱글 플레이</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>액션</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>인디</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>시뮬레이션</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>VR</ModalFilterTagText>
-              </ModalFilterTag>
-              <ModalFilterTag bordered rounded light primary small>
-                <ModalFilterTagText>캐주얼</ModalFilterTagText>
-              </ModalFilterTag>
-            </ModalFilterTagList>
-          </ModalFilterItem>
-        </FilterWrap>
-      </FilterModalBox>
-    </Modal>
-  );
-};
+
 export default FilterModal;

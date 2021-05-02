@@ -6,9 +6,9 @@ import {youtubeList} from '../store/ui/uiSelector';
 const Detail = ({route, navigation}: any) => {
   const youtube = useSelector(youtubeList)
   const {id} = route.params;
-  const navigationYoutubePage = (id: string) => {
+  const navigationYoutubePage = (youtube_id: string) => {
     navigation.navigate('YoutubeDetail', {
-      id: id,
+      id: youtube_id,
     });
   };
   return (
