@@ -72,8 +72,20 @@ const FilterModal: React.FC<FilterModalProps> = (props: any) => {
             </ModalFilterItemText>
             <ModalFilterTagList>
               {filterArray.map((item: string, i:number) => (
-                <ModalFilterTag onPress={() => addTag(item)} key={i} bordered rounded light primary small>
-                  <ModalFilterTagText>{item}</ModalFilterTagText>
+                <ModalFilterTag 
+                  onPress={() => addTag(item)} key={i} 
+                  style={{
+                    backgroundColor: tag.indexOf(item) > -1 ? "rgb(63, 81, 181)" : ""
+                  }}
+                  rounded
+                  bordered
+                  small
+                >
+                  <ModalFilterTagText
+                    style={{color: tag.indexOf(item) > -1 ? "#fff" : "rgb(63, 81, 181)"}}
+                  >
+                    {item}
+                  </ModalFilterTagText>
                 </ModalFilterTag>
               ))}
             </ModalFilterTagList>
